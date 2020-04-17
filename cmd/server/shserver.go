@@ -25,5 +25,7 @@ func main() {
 		}
 
 		fmt.Printf("%T\n", conn)
+
+		conn.Write([]byte("Hello from server"))
 	}
 }
