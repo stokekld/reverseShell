@@ -8,6 +8,9 @@ import (
 
 func main() {
 
+	
+	var line string
+
 	fmt.Println("Initializing server...")
 
 	ln, err := net.Listen("tcp", ":8080")
@@ -17,15 +20,29 @@ func main() {
 		os.Exit(1)
 	}
 
-	for {
-		conn, err := ln.Accept()
+	conn, err := ln.Accept()
 
-		if err != nil {
-			// handle error
-		}
-
-		fmt.Printf("%T\n", conn)
-
-		conn.Write([]byte("Hello from server"))
+	if err != nil {
+		// handle error
 	}
+
+	fmt.Printf("%T\n", conn)
+
+	go func(){
+		for {
+			buffer := make([]byte, 1024)
+			
+			conn.Read(buffer)
+
+			fmt.Print(string(buffer))
+		}
+	}()
+
+	for {
+		fmt.Scanln(&line)
+		conn.Write([]byte(line + "\n"))	
+		line = ""
+	}
+	
+
 }
