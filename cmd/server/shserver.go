@@ -2,14 +2,16 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net"
 	"os"
+
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 func main() {
 
-	
-	var line string
+	//var line string
 
 	fmt.Println("Initializing server...")
 
@@ -26,23 +28,10 @@ func main() {
 		// handle error
 	}
 
-	fmt.Printf("%T\n", conn)
+	go func() { io.Copy(os.Stdout, conn) }()
 
-	go func(){
-		for {
-			buffer := make([]byte, 1024)
-			
-			conn.Read(buffer)
+	oldState, err := terminal.MakeRaw(int(os.Stdin.Fd()))
+	io.Copy(conn, os.Stdin)
 
-			fmt.Print(string(buffer))
-		}
-	}()
-
-	for {
-		fmt.Scanln(&line)
-		conn.Write([]byte(line + "\n"))	
-		line = ""
-	}
-	
-
+	terminal.Restore(int(os.Stdin.Fd()), oldState)
 }
